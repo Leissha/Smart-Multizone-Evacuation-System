@@ -43,7 +43,7 @@ NODE_CONTRACTS: tuple[NodeContract, ...] = (
         accent="gold",
     ),
     NodeContract(
-        device_id="node-4-command-centre",
+        device_id="node-4-command-center",
         display_name="Node 4 – Command Centre",
         zone="Zone 4",
         purpose="Central command terminal",

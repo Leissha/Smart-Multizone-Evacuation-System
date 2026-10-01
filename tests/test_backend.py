@@ -56,7 +56,7 @@ def test_registry_contains_typed_contracts():
     contracts = list_node_contracts()
     assert [contract.device_id for contract in contracts] == [
         "node-1-fire-detection", "node-2-exit-monitoring",
-        "node-3-equipment-room", "node-4-command-centre",
+        "node-3-equipment-room", "node-4-command-center",
     ]
     node3 = get_node_contract("node-3-equipment-room")
     assert node3 is not None
@@ -76,7 +76,7 @@ def test_health_and_generic_node_list():
 
 
 def test_status_latest_and_history_work_for_any_registered_node():
-    for node_id in ("node-1-fire-detection", "node-2-exit-monitoring", "node-3-equipment-room", "node-4-command-centre"):
+    for node_id in ("node-1-fire-detection", "node-2-exit-monitoring", "node-3-equipment-room", "node-4-command-center"):
         assert client.get(f"/api/nodes/{node_id}/status").status_code == 200
         assert client.get(f"/api/nodes/{node_id}/telemetry/latest").status_code == 200
         assert client.get(f"/api/nodes/{node_id}/telemetry/history").status_code == 200

@@ -1,6 +1,6 @@
 # Node 4 — Command Centre
 
-Device name: `node-4-command-centre`
+Device name: `node-4-command-center`
 
 Node 4 is the central command terminal: a manual emergency button, a status display, and a master alarm buzzer that can be triggered locally or remotely.
 
