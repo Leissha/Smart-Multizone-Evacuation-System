@@ -27,6 +27,12 @@ Node 3 is the current physical reference implementation.
 
 See the [Node 3 contract](docs/contracts/node3.md) for hardware, telemetry, RPC and verification details.
 
+## Node 4
+
+Node 4 is the command centre: a manual emergency button, a status display, and a master alarm, with remote lockdown control over ThingsBoard RPC.
+
+See the [Node 4 contract](docs/contracts/node4.md) for hardware, telemetry, RPC and verification details.
+
 ## Setup
 
 ```powershell
@@ -53,6 +59,14 @@ Close Arduino Serial Monitor first, then run:
 
 ```powershell
 .\.venv\Scripts\python.exe -m devices.node3.edge.main
+```
+
+### Node 4 edge
+
+Close Arduino Serial Monitor first, then run:
+
+```powershell
+.\.venv\Scripts\python.exe -m devices.node4.edge.main
 ```
 
 ### FastAPI

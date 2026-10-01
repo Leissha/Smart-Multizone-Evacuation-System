@@ -52,6 +52,7 @@ NODE_CONTRACTS: tuple[NodeContract, ...] = (
             TelemetryField("display_state", "string"),
             TelemetryField("master_buzzer", "boolean"),
         ),
+        rpc_methods=("setLockdown", "setBuzzer"),
         accent="blue",
     ),
 )
@@ -65,4 +66,3 @@ def list_node_contracts() -> tuple[NodeContract, ...]:
 
 def get_node_contract(device_id: str) -> NodeContract | None:
     return _BY_ID.get(device_id)
-
