@@ -48,7 +48,9 @@ ThingsBoard sends RPC commands to the edge. The edge converts them to Arduino se
 | --- | --- | --- |
 | `setRelay` | `RELAY_ON` | `RELAY_OFF` |
 | `setBuzzer` | `BUZZER_ON` | `BUZZER_OFF` |
-| `setAll` | `ALL_ON` | `ALL_OFF` |
+| `setEquipmentAlarm` | `ALL_ON` | `ALL_OFF` |
+
+`setEquipmentAlarm` controls the relay and buzzer together. The Arduino serial commands remain `ALL_ON` and `ALL_OFF`.
 
 Example response:
 
@@ -122,7 +124,7 @@ THINGSBOARD_TLS
 3. Start the Node 3 edge service.
 4. Confirm telemetry updates in ThingsBoard.
 5. Trigger the sound sensor and ball switch.
-6. Test `setRelay` and `setBuzzer`.
+6. Test `setRelay`, `setBuzzer`, and `setEquipmentAlarm`.
 7. Confirm the physical output and matching ACK.
 8. Verify the updated state is returned to ThingsBoard.
 

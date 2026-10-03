@@ -19,7 +19,7 @@ watchEffect(() => {
 const methodLabels: Record<string, string> = {
   setRelay: 'Relay',
   setBuzzer: 'Buzzer',
-  setAll: 'All outputs',
+  setEquipmentAlarm: 'Equipment alarm',
 }
 const methodStateKeys: Record<string, string> = {
   setRelay: 'relay_state',
@@ -27,6 +27,9 @@ const methodStateKeys: Record<string, string> = {
 }
 
 function currentState(method: string) {
+  if (method === 'setEquipmentAlarm') {
+    return device.value.telemetry.relay_state && device.value.telemetry.buzzer_state ? 'ON' : 'OFF'
+  }
   const key = methodStateKeys[method]
   if (!key) return '—'
   return device.value.telemetry[key] ? 'ON' : 'OFF'

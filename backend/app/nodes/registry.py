@@ -39,7 +39,7 @@ NODE_CONTRACTS: tuple[NodeContract, ...] = (
             TelemetryField("buzzer_state", "boolean"),
             TelemetryField("equipment_fault", "boolean"),
         ),
-        rpc_methods=("setRelay", "setBuzzer", "setAll"),
+        rpc_methods=("setRelay", "setBuzzer", "setEquipmentAlarm"),
         accent="gold",
     ),
     NodeContract(
