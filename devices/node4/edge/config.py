@@ -26,7 +26,7 @@ class EdgeConfig:
     thingsboard_port: int = int(os.getenv("THINGSBOARD_PORT", "8883"))
     thingsboard_access_token: str = os.getenv("THINGSBOARD_ACCESS_TOKEN", "")
     thingsboard_tls: bool = env_bool("THINGSBOARD_TLS", True)
-    device_id: str = os.getenv("DEVICE_ID", "node-4-command-centre")
+    device_id: str = os.getenv("DEVICE_ID", "node-4-command-center")
 
 
 def get_config() -> EdgeConfig:
