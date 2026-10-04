@@ -44,7 +44,7 @@ NODE_CONTRACTS: tuple[NodeContract, ...] = (
     ),
     NodeContract(
         device_id="node-4-command-center",
-        display_name="Node 4 – Command Centre",
+        display_name="Node 4 – Command Center",
         zone="Zone 4",
         purpose="Central command terminal",
         telemetry_fields=(

@@ -28,7 +28,7 @@ const methodStateKeys: Record<string, string> = {
 
 function currentState(method: string) {
   if (method === 'setEquipmentAlarm') {
-    return device.value.telemetry.relay_state && device.value.telemetry.buzzer_state ? 'ON' : 'OFF'
+    return !device.value.telemetry.relay_state && device.value.telemetry.buzzer_state ? 'ON' : 'OFF'
   }
   const key = methodStateKeys[method]
   if (!key) return '—'

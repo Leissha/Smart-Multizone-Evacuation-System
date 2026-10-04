@@ -19,7 +19,7 @@ The web application uses fresh ThingsBoard telemetry when available. If a node i
 | Node 1 | Kitchen / Lab | Fire detection |
 | Node 2 | Hallway | Exit monitoring |
 | Node 3 | Equipment Room | Sound and vibration monitoring, buzzer and relay control |
-| Node 4 | Command Centre | Manual emergency input and central status display |
+| Node 4 | Command Center | Manual emergency input and central status display |
 
 ## Node 3
 
@@ -29,7 +29,7 @@ See the [Node 3 contract](docs/contracts/node3.md) for hardware, telemetry, RPC 
 
 ## Node 4
 
-Node 4 is the command centre: a manual emergency button, a status display, and a master alarm, with remote lockdown control over ThingsBoard RPC.
+Node 4 is the command center: a manual emergency button, a status display, and a master alarm, with remote lockdown control over ThingsBoard RPC.
 
 See the [Node 4 contract](docs/contracts/node4.md) for hardware, telemetry, RPC and verification details.
 

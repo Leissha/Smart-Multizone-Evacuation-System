@@ -24,7 +24,7 @@ The Arduino sends one telemetry frame approximately once per second.
 | --- | --- | --- |
 | `sound_level` | Integer `0–1023` | Maximum ADC reading from the sound sampling window |
 | `vibration_detected` | Boolean | Ball switch state |
-| `relay_state` | Boolean | Current relay state |
+| `relay_state` | Boolean | Equipment power relay; `true` means the demonstration load is powered |
 | `buzzer_state` | Boolean | Current buzzer state |
 
 Example:
@@ -33,7 +33,7 @@ Example:
 {
   "sound_level": 412,
   "vibration_detected": true,
-  "relay_state": false,
+  "relay_state": true,
   "buzzer_state": false
 }
 ```
@@ -48,9 +48,9 @@ ThingsBoard sends RPC commands to the edge. The edge converts them to Arduino se
 | --- | --- | --- |
 | `setRelay` | `RELAY_ON` | `RELAY_OFF` |
 | `setBuzzer` | `BUZZER_ON` | `BUZZER_OFF` |
-| `setEquipmentAlarm` | `ALL_ON` | `ALL_OFF` |
+| `setEquipmentAlarm` | `EQUIPMENT_ALARM_ON` | `EQUIPMENT_ALARM_OFF` |
 
-`setEquipmentAlarm` controls the relay and buzzer together. The Arduino serial commands remain `ALL_ON` and `ALL_OFF`.
+`setEquipmentAlarm(true)` isolates the equipment by switching the relay off and activates the buzzer. `setEquipmentAlarm(false)` silences the buzzer and restores the relay-powered load. The edge reports success only after the matching Arduino ACK.
 
 Example response:
 

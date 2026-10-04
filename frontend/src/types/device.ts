@@ -57,6 +57,7 @@ export interface SystemStatus {
 
 export interface AlarmRecord {
   id?: { id?: string }
+  originatorName?: string
   type?: string
   severity?: string
   status?: string
