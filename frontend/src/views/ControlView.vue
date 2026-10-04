@@ -19,9 +19,15 @@ watchEffect(() => {
 const methodLabels: Record<string, string> = {
   setRelay: 'Relay',
   setEquipmentAlarm: 'Equipment alarm',
+  setBuzzer: 'Buzzer',
+  setEvacuation: 'Evacuation guidance',
+  setExitClosed: 'Close exit route',
 }
 const methodStateKeys: Record<string, string> = {
   setRelay: 'relay_state',
+  setBuzzer: 'buzzer_state',
+  setEvacuation: 'evacuation_mode',
+  setExitClosed: 'exit_closed',
 }
 
 function currentState(method: string) {

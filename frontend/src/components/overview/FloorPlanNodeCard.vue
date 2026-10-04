@@ -5,7 +5,8 @@ import type { DeviceViewModel } from '../../types/device'
 const props = defineProps<{ device: DeviceViewModel }>()
 const labels: Record<string, string> = {
   temperature: 'Temperature', smoke_level: 'Smoke level', fire_detected: 'Fire detected',
-  distance_cm: 'Distance', exit_blocked: 'Exit blocked', sound_level: 'Sound',
+  distance_cm: 'Distance', exit_blocked: 'Exit blocked', threshold_cm: 'Block threshold',
+  evacuation_mode: 'Evacuation', exit_closed: 'Exit closed', sensor_ok: 'Sensor OK', sound_level: 'Sound',
   vibration_detected: 'Vibration', relay_state: 'Relay', buzzer_state: 'Buzzer',
   manual_emergency: 'Emergency', display_state: 'Display', master_buzzer: 'Master buzzer',
 }
@@ -19,7 +20,7 @@ function displayValue(key: string, value: string | number | boolean) {
     return value ? 'Yes' : 'No'
   }
   if (key === 'temperature') return `${value} °C`
-  if (key === 'distance_cm') return `${value} cm`
+  if (key === 'distance_cm' || key === 'threshold_cm') return `${value} cm`
   return value
 }
 </script>

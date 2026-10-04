@@ -24,7 +24,13 @@ NODE_CONTRACTS: tuple[NodeContract, ...] = (
         telemetry_fields=(
             TelemetryField("distance_cm", "number", "cm"),
             TelemetryField("exit_blocked", "boolean"),
+            TelemetryField("threshold_cm", "number", "cm"),
+            TelemetryField("evacuation_mode", "boolean"),
+            TelemetryField("exit_closed", "boolean"),
+            TelemetryField("buzzer_state", "boolean"),
+            TelemetryField("sensor_ok", "boolean"),
         ),
+        rpc_methods=("setEvacuation", "setExitClosed", "setBuzzer"),
         accent="sage",
     ),
     NodeContract(
