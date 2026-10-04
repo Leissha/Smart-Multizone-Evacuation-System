@@ -1,6 +1,7 @@
 from devices.node3.edge.actuator_service import ActuatorService
 from devices.node3.edge.sensor_parser import parse_bool, parse_telemetry_line
 from devices.node3.edge.thingsboard_client import (
+    RPC_COMMANDS,
     TELEMETRY_TOPIC,
     ThingsBoardClient,
     connection_failed,
@@ -129,3 +130,49 @@ def test_rpc_waits_for_ack_and_returns_state():
     actuators.tick(FakeSerial(), now=1)
     actuators.handle_ack("ACK=BUZZER_ON")
     assert responses == [("7", {"success": True, "method": "setBuzzer", "buzzer_state": True})]
+
+
+def test_equipment_alarm_rpc_maps_to_existing_all_commands_and_acks():
+    assert RPC_COMMANDS == {
+        "setRelay": ("RELAY_ON", "RELAY_OFF", "relay_state"),
+        "setBuzzer": ("BUZZER_ON", "BUZZER_OFF", "buzzer_state"),
+        "setEquipmentAlarm": ("ALL_ON", "ALL_OFF", "equipment_alarm"),
+    }
+
+    for request_id, enabled, command in (("8", True, "ALL_ON"), ("9", False, "ALL_OFF")):
+        responses = []
+        actuators = ActuatorService()
+        client = ThingsBoardClient(Config(), actuators)
+        client.respond = lambda response_id, response: responses.append((response_id, response))
+
+        client.handle_rpc_payload(
+            request_id,
+            {"method": "setEquipmentAlarm", "params": enabled},
+        )
+        serial = FakeSerial()
+        actuators.tick(serial, now=1)
+        assert serial.sent == [command]
+        assert responses == []
+        assert actuators.handle_ack(f"ACK={command}") is True
+        assert responses == [(
+            request_id,
+            {
+                "success": True,
+                "method": "setEquipmentAlarm",
+                "equipment_alarm": enabled,
+            },
+        )]
+
+
+def test_old_and_unknown_rpc_methods_are_rejected():
+    responses = []
+    client = ThingsBoardClient(Config(), ActuatorService())
+    client.respond = lambda request_id, response: responses.append((request_id, response))
+
+    client.handle_rpc_payload("10", {"method": "setAll", "params": True})
+    client.handle_rpc_payload("11", {"method": "notSupported", "params": True})
+
+    assert responses == [
+        ("10", {"success": False, "method": "setAll", "error": "unsupported method"}),
+        ("11", {"success": False, "method": "notSupported", "error": "unsupported method"}),
+    ]

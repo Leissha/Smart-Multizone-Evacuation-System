@@ -61,7 +61,7 @@ def test_registry_contains_typed_contracts():
     node3 = get_node_contract("node-3-equipment-room")
     assert node3 is not None
     assert node3.telemetry_keys[:2] == ("sound_level", "vibration_detected")
-    assert node3.rpc_methods == ("setRelay", "setBuzzer", "setAll")
+    assert node3.rpc_methods == ("setRelay", "setBuzzer", "setEquipmentAlarm")
     assert get_node_contract("unknown") is None
 
 

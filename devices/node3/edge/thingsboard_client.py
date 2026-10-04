@@ -14,7 +14,7 @@ RPC_RESPONSE_PREFIX = "v1/devices/me/rpc/response/"
 RPC_COMMANDS = {
     "setRelay": ("RELAY_ON", "RELAY_OFF", "relay_state"),
     "setBuzzer": ("BUZZER_ON", "BUZZER_OFF", "buzzer_state"),
-    "setAll": ("ALL_ON", "ALL_OFF", "all_state"),
+    "setEquipmentAlarm": ("ALL_ON", "ALL_OFF", "equipment_alarm"),
 }
 
 
