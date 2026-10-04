@@ -21,6 +21,12 @@ The web application uses fresh ThingsBoard telemetry when available. If a node i
 | Node 3 | Equipment Room | Sound and vibration monitoring with relay-controlled equipment isolation |
 | Node 4 | Command Center | Manual emergency input and central status display |
 
+## Node 2
+
+Node 2 is the hallway exit monitor: an HC-SR04 ultrasonic sensor decides whether the exit is blocked, and green/red LEDs plus a buzzer guide people. It can be switched into evacuation guidance mode, closed, or reconfigured (blocking threshold) remotely over ThingsBoard RPC and shared attributes.
+
+See the [Node 2 contract](docs/contracts/node2.md) and the [Node 2 setup guide](docs/node2-setup-guide.md).
+
 ## Node 3
 
 Node 3 is the current physical reference implementation.
@@ -52,6 +58,14 @@ The root `.env` contains only FastAPI's ThingsBoard REST settings. Each physical
 On an edge-only VM, install `requirements-edge.txt` instead of the full web stack.
 
 ## Run
+
+### Node 2 edge
+
+Close Arduino Serial Monitor first, then run:
+
+```powershell
+.\.venv\Scripts\python.exe -m devices.node2.edge.main
+```
 
 ### Node 3 edge
 
@@ -123,4 +137,7 @@ tools/                   Diagnostic utilities
 
 - [Add a physical node](docs/adding-a-node.md)
 - [ThingsBoard setup](cloud/thingsboard/README.md)
+- [Node 2 contract](docs/contracts/node2.md)
+- [Node 2 setup guide](docs/node2-setup-guide.md)
+- [Node 2 ThingsBoard rules](cloud/thingsboard/node2-rule-notes.md)
 - [Node 3 contract](docs/contracts/node3.md)

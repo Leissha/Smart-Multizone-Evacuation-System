@@ -7,14 +7,15 @@ defineProps<{ device: DeviceViewModel }>()
 const icons = { coral: Flame, sage: RadioTower, gold: Settings2, blue: Activity }
 const labels: Record<string, string> = {
   temperature: 'Temperature', smoke_level: 'Smoke level', fire_detected: 'Fire detected',
-  distance_cm: 'Distance', exit_blocked: 'Exit blocked', sound_level: 'Sound level',
+  distance_cm: 'Distance', exit_blocked: 'Exit blocked', threshold_cm: 'Block threshold',
+  evacuation_mode: 'Evacuation', exit_closed: 'Exit closed', sensor_ok: 'Sensor OK', sound_level: 'Sound level',
   vibration_detected: 'Vibration', relay_state: 'Relay', buzzer_state: 'Buzzer',
   manual_emergency: 'Manual emergency', display_state: 'Display state', master_buzzer: 'Master buzzer',
 }
 function displayValue(key: string, value: string | number | boolean) {
   if (typeof value === 'boolean') return value ? 'Yes' : 'No'
   if (key === 'temperature') return `${value} °C`
-  if (key === 'distance_cm') return `${value} cm`
+  if (key === 'distance_cm' || key === 'threshold_cm') return `${value} cm`
   return value
 }
 </script>
