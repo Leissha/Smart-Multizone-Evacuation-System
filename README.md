@@ -18,7 +18,7 @@ The web application uses fresh ThingsBoard telemetry when available. If a node i
 | --- | --- | --- |
 | Node 1 | Kitchen / Lab | Fire detection |
 | Node 2 | Hallway | Exit monitoring |
-| Node 3 | Equipment Room | Sound and vibration monitoring, buzzer and relay control |
+| Node 3 | Equipment Room | Sound and vibration monitoring with relay-controlled equipment isolation |
 | Node 4 | Command Center | Manual emergency input and central status display |
 
 ## Node 3

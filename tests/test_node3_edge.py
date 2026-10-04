@@ -43,9 +43,9 @@ class FakeMqttClient:
 
 def test_valid_node3_telemetry_and_booleans():
     result = parse_telemetry_line(
-        "sound_level=116,vibration_detected=true,relay_state=false,buzzer_state=false"
+        "sound_level=116,vibration_detected=true,relay_state=false"
     )
-    assert result == {"sound_level": 116, "vibration_detected": True, "relay_state": False, "buzzer_state": False}
+    assert result == {"sound_level": 116, "vibration_detected": True, "relay_state": False}
     assert parse_bool("TRUE") is True
 
 
@@ -68,7 +68,7 @@ def test_expected_ack_completes_command():
 def test_timeout_wrong_ack_and_serial_failure_fail():
     outcomes = []
     service = ActuatorService(2)
-    service.request("BUZZER_ON", lambda ok, message: outcomes.append(ok))
+    service.request("EQUIPMENT_ALARM_ON", lambda ok, message: outcomes.append(ok))
     service.tick(FakeSerial(), now=10)
     service.tick(FakeSerial(), now=12)
     assert outcomes == [False]
@@ -78,7 +78,7 @@ def test_timeout_wrong_ack_and_serial_failure_fail():
     assert service.handle_ack("ACK=RELAY_ON") is False
     assert outcomes[-1] is False
 
-    service.request("ALL_OFF", lambda ok, message: outcomes.append(ok))
+    service.request("EQUIPMENT_ALARM_OFF", lambda ok, message: outcomes.append(ok))
     service.tick(FakeSerial(False), now=30)
     assert outcomes[-1] is False
 
@@ -125,17 +125,16 @@ def test_rpc_waits_for_ack_and_returns_state():
     actuators = ActuatorService()
     client = ThingsBoardClient(Config(), actuators)
     client.respond = lambda request_id, response: responses.append((request_id, response))
-    client.handle_rpc_payload("7", {"method": "setBuzzer", "params": True})
+    client.handle_rpc_payload("7", {"method": "setRelay", "params": True})
     assert responses == []
     actuators.tick(FakeSerial(), now=1)
-    actuators.handle_ack("ACK=BUZZER_ON")
-    assert responses == [("7", {"success": True, "method": "setBuzzer", "buzzer_state": True})]
+    actuators.handle_ack("ACK=RELAY_ON")
+    assert responses == [("7", {"success": True, "method": "setRelay", "relay_state": True})]
 
 
 def test_equipment_alarm_rpc_isolates_equipment_and_uses_matching_acks():
     assert RPC_COMMANDS == {
         "setRelay": ("RELAY_ON", "RELAY_OFF", "relay_state"),
-        "setBuzzer": ("BUZZER_ON", "BUZZER_OFF", "buzzer_state"),
         "setEquipmentAlarm": (
             "EQUIPMENT_ALARM_ON",
             "EQUIPMENT_ALARM_OFF",

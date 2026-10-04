@@ -10,10 +10,6 @@ Completion = Callable[[bool, str], None]
 VALID_COMMANDS = {
     "RELAY_ON",
     "RELAY_OFF",
-    "BUZZER_ON",
-    "BUZZER_OFF",
-    "ALL_ON",
-    "ALL_OFF",
     "EQUIPMENT_ALARM_ON",
     "EQUIPMENT_ALARM_OFF",
 }

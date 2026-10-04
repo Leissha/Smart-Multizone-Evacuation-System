@@ -18,17 +18,15 @@ watchEffect(() => {
 
 const methodLabels: Record<string, string> = {
   setRelay: 'Relay',
-  setBuzzer: 'Buzzer',
   setEquipmentAlarm: 'Equipment alarm',
 }
 const methodStateKeys: Record<string, string> = {
   setRelay: 'relay_state',
-  setBuzzer: 'buzzer_state',
 }
 
 function currentState(method: string) {
   if (method === 'setEquipmentAlarm') {
-    return !device.value.telemetry.relay_state && device.value.telemetry.buzzer_state ? 'ON' : 'OFF'
+    return !device.value.telemetry.relay_state ? 'ON' : 'OFF'
   }
   const key = methodStateKeys[method]
   if (!key) return '—'

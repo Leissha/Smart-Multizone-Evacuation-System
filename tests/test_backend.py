@@ -61,7 +61,7 @@ def test_registry_contains_typed_contracts():
     node3 = get_node_contract("node-3-equipment-room")
     assert node3 is not None
     assert node3.telemetry_keys[:2] == ("sound_level", "vibration_detected")
-    assert node3.rpc_methods == ("setRelay", "setBuzzer", "setEquipmentAlarm")
+    assert node3.rpc_methods == ("setRelay", "setEquipmentAlarm")
     assert get_node_contract("unknown") is None
 
 
@@ -107,7 +107,7 @@ def test_rpc_validation_depends_on_node_contract():
 
 def test_node3_legacy_control_routes_still_work():
     assert client.post("/api/devices/node-3-equipment-room/relay", json={"enabled": True}).status_code == 200
-    assert client.post("/api/devices/node-3-equipment-room/buzzer", json={"enabled": False}).status_code == 200
+    assert client.post("/api/devices/node-3-equipment-room/buzzer", json={"enabled": False}).status_code == 400
 
 
 def test_system_status_counts_each_node_independently():
