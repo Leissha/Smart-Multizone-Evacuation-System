@@ -10,6 +10,7 @@ const status = ref<SystemStatus>({ api_healthy: true, thingsboard_connected: fal
 const loading = ref(false)
 const error = ref('')
 let intervalId: number | undefined
+let contracts: NodeContractSummary[] | null = null
 
 function applyContract(device: DeviceViewModel, contract: NodeContractSummary) {
   device.displayName = contract.name
@@ -30,50 +31,56 @@ function applyLiveTelemetry(device: DeviceViewModel, telemetry: TelemetryRecord,
   }
 }
 
-async function refreshNode(device: DeviceViewModel, contract: NodeContractSummary): Promise<boolean> {
-  const [nodeStatus, telemetry] = await Promise.all([
-    api.nodeStatus(contract.device_id),
-    api.nodeLatest(contract.device_id),
-  ])
+function refreshNode(device: DeviceViewModel, contract: NodeContractSummary, telemetry: TelemetryRecord): boolean {
   const newestTs = Math.max(0, ...Object.values(telemetry).map((sample) => sample?.ts ?? 0))
   const freshnessSeconds = freshnessOverrideSeconds > 0 ? freshnessOverrideSeconds : contract.freshness_seconds
-  const live = nodeStatus.active && newestTs > 0 && Date.now() - newestTs <= freshnessSeconds * 1000
+  const live = newestTs > 0 && Date.now() - newestTs <= freshnessSeconds * 1000
   if (live) applyLiveTelemetry(device, telemetry, newestTs)
   return live
 }
 
 async function refresh() {
+  if (loading.value) return
   loading.value = true
   const baseline = cloneSimulatedDevices()
-  const [registryResult, systemResult, alarmResult] = await Promise.allSettled([
-    api.nodes(), api.systemStatus(), api.alarms(),
-  ])
-
-  const contracts = registryResult.status === 'fulfilled' ? registryResult.value : []
-  for (const contract of contracts) {
+  const registryResult = contracts
+    ? { status: 'fulfilled' as const, value: contracts }
+    : await api.nodes().then(
+      (value) => ({ status: 'fulfilled' as const, value }),
+      (reason) => ({ status: 'rejected' as const, reason }),
+    )
+  if (registryResult.status === 'fulfilled') contracts = registryResult.value
+  const currentContracts = contracts ?? []
+  for (const contract of currentContracts) {
     const device = baseline.find((item) => item.id === contract.device_id)
     if (device) applyContract(device, contract)
   }
 
-  const nodeResults = await Promise.allSettled(contracts.map(async (contract) => {
+  const snapshotResult = await api.nodesLatest().then(
+    (value) => ({ status: 'fulfilled' as const, value }),
+    (reason) => ({ status: 'rejected' as const, reason }),
+  )
+  const snapshot = snapshotResult.status === 'fulfilled' ? snapshotResult.value : {}
+  const cloudHasTelemetry = Object.values(snapshot).some((telemetry) => Object.keys(telemetry).length > 0)
+  const nodeResults = currentContracts.map((contract) => {
     const device = baseline.find((item) => item.id === contract.device_id)
-    return device ? refreshNode(device, contract) : false
-  }))
-  const liveNodes = nodeResults.filter((result) => result.status === 'fulfilled' && result.value).length
+    return device ? refreshNode(device, contract, snapshot[contract.device_id] ?? {}) : false
+  })
+  const liveNodes = nodeResults.filter(Boolean).length
 
   devices.value = baseline
-  alarms.value = alarmResult.status === 'fulfilled' ? alarmResult.value.data ?? [] : []
-  const cloudStatus = systemResult.status === 'fulfilled' ? systemResult.value : null
+  alarms.value = []
   status.value = {
     api_healthy: true,
-    thingsboard_connected: cloudStatus?.thingsboard_connected ?? liveNodes > 0,
+    thingsboard_connected: snapshotResult.status === 'fulfilled' && cloudHasTelemetry,
     active_alarm_count: alarms.value.filter((alarm) => !alarm.cleared).length,
     live_nodes: liveNodes,
     simulated_nodes: baseline.length - liveNodes,
   }
 
-  const topLevelFailures = [registryResult, systemResult, alarmResult].filter((result) => result.status === 'rejected')
-  error.value = topLevelFailures.length === 3 ? 'Unable to load cloud data' : ''
+  error.value = registryResult.status === 'rejected' || snapshotResult.status === 'rejected'
+    ? 'Unable to load cloud data'
+    : ''
   loading.value = false
 }
 
@@ -84,6 +91,6 @@ export function useSystemData() {
 }
 
 export function startSystemPolling() {
-  onMounted(() => { refresh(); intervalId = window.setInterval(refresh, 5000) })
+  onMounted(() => { refresh(); intervalId = window.setInterval(refresh, 15000) })
   onBeforeUnmount(() => window.clearInterval(intervalId))
 }

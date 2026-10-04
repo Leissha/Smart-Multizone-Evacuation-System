@@ -76,6 +76,19 @@ def node_detail(device_id: str) -> DeviceSummary:
     return contract_summary(require_registered_node(device_id))
 
 
+@router.get("/nodes/telemetry/latest")
+def latest_node_telemetry(service: Service) -> dict[str, dict]:
+    """Return the latest telemetry for every registered node in one response."""
+    snapshot: dict[str, dict] = {}
+    for contract in list_node_contracts():
+        try:
+            device_uuid = service.resolve_device_uuid(contract.device_id)
+            snapshot[contract.device_id] = service.latest(device_uuid, contract.telemetry_fields)
+        except ThingsBoardError:
+            snapshot[contract.device_id] = {}
+    return snapshot
+
+
 @router.post("/devices", response_model=DeviceProvisionResponse, status_code=201)
 @router.post("/nodes", response_model=DeviceProvisionResponse, status_code=201)
 def create_device(payload: DeviceCreateRequest, service: Service) -> DeviceProvisionResponse:

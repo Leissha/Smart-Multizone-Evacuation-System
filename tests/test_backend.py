@@ -82,6 +82,14 @@ def test_status_latest_and_history_work_for_any_registered_node():
         assert client.get(f"/api/nodes/{node_id}/telemetry/history").status_code == 200
 
 
+def test_latest_telemetry_snapshot_contains_every_registered_node():
+    response = client.get("/api/nodes/telemetry/latest")
+    assert response.status_code == 200
+    snapshot = response.json()
+    assert set(snapshot) == {contract.device_id for contract in list_node_contracts()}
+    assert snapshot["node-3-equipment-room"]["sound_level"]["value"] == 116
+
+
 def test_rpc_validation_depends_on_node_contract():
     valid = client.post(
         "/api/nodes/node-3-equipment-room/rpc",

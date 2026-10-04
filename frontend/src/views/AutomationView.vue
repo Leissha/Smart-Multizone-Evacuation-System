@@ -1,2 +1,69 @@
-<script setup lang="ts">import { Plus } from '@lucide/vue';import { ref } from 'vue';import PageTitle from '../components/common/PageTitle.vue';const builder=ref(false);const rules=[{name:'Equipment Fault',type:'Device Rule',status:'DRAFT',condition:'Node 3: sound_level > sound_threshold AND vibration = true',action:'Alarm · Relay OFF · Buzzer ON'},{name:'Fire & Exit Evacuation',type:'Cross-Node Rule',status:'PLANNED',condition:'Node 1 fire detected AND Node 2 exit clear',action:'Evacuation state · notify Node 4'},{name:'Emergency Isolation',type:'Cross-Node Rule',status:'PLANNED',condition:'Fire detected AND Node 3 relay ON',action:'Node 3 relay OFF'}]</script>
-<template><div class="view-stack"><PageTitle eyebrow="Cloud rule processing" title="Automation" description="Device and cross-node rules for the Evacuation System Rules chain."><button class="action-button" @click="builder=!builder"><Plus/> Add Rule</button></PageTitle><section class="automation-list"><article v-for="r in rules" :key="r.name" class="raised-card automation-card"><div><span class="draft-badge">{{r.status}}</span><h2>{{r.name}}</h2><small>{{r.type}}</small></div><div><b>WHEN</b><p>{{r.condition}}</p></div><div><b>THEN</b><p>{{r.action}}</p></div></article></section><section v-if="builder" class="raised-card builder"><h2>Simplified rule builder</h2><div class="builder-row"><b>WHEN</b><select><option>Node 3</option></select><select><option>sound_level</option></select><select><option>&gt;</option></select><input value="300"/></div><div class="builder-row"><b>THEN</b><select><option>Create alarm</option><option>Set derived state</option><option>Send RPC</option></select></div><p class="notice warning">Design preview only. Cloud rule-chain mutation is not enabled, so Save cannot claim success.</p><button class="action-button" disabled>Save unavailable</button></section><section class="raised-card strategy"><h2>Rule-chain strategy</h2><p>Root Rule Chain → <b>Evacuation System Rules</b> → per-originator branches → cross-node rules. Thresholds such as <code>sound_threshold</code> should be ThingsBoard attributes.</p></section></div></template>
+<script setup lang="ts">
+import { ArrowDown, ArrowRight, Building2, Flame, RadioTower, Route, ShieldAlert, Volume2 } from '@lucide/vue'
+import PageTitle from '../components/common/PageTitle.vue'
+
+const inputs = [
+  { node: 'Node 1', label: 'Fire detection', detail: 'fire_detected', icon: Flame, tone: 'coral' },
+  { node: 'Node 2', label: 'Exit monitoring', detail: 'exit_blocked', icon: Route, tone: 'gold' },
+  { node: 'Node 3', label: 'Equipment room', detail: 'sound + vibration', icon: Volume2, tone: 'blue' },
+]
+
+const responses = [
+  { node: 'Node 2', label: 'Evacuation guidance', detail: 'Evacuate or close route', icon: Route, tone: 'gold' },
+  { node: 'Node 4', label: 'Emergency alert', detail: 'LCD status + master warning', icon: Building2, tone: 'sage' },
+  { node: 'Node 3', label: 'Equipment isolation', detail: 'Relay OFF · manual reset', icon: ShieldAlert, tone: 'blue' },
+]
+
+const rules = [
+  { tag: 'FIRE', condition: 'Node 1 fire active', action: 'Node 2 evacuation + Node 4 emergency alert' },
+  { tag: 'BLOCKED EXIT', condition: 'Fire active + Node 2 exit blocked', action: 'Close unsafe route + critical emergency alert' },
+  { tag: 'EQUIPMENT', condition: 'Fire active + sound > 100 + vibration', action: 'Node 3 equipment power isolated' },
+]
+</script>
+
+<template>
+  <div class="view-stack">
+    <PageTitle eyebrow="Cloud rule processing" title="Automation" description="Deployed ThingsBoard flow from MQTT telemetry to coordinated device response." />
+
+    <section class="raised-card automation-map">
+      <div class="map-column">
+        <p class="map-label">Telemetry inputs</p>
+        <article v-for="item in inputs" :key="item.node" class="flow-node" :class="`flow-node--${item.tone}`">
+          <span><component :is="item.icon" :size="20" /></span>
+          <div><b>{{ item.node }} · {{ item.label }}</b><small>{{ item.detail }}</small></div>
+        </article>
+      </div>
+
+      <div class="map-connector"><ArrowRight /><ArrowDown /></div>
+
+      <div class="flow-hub">
+        <span><RadioTower :size="28" /></span>
+        <small>THINGSBOARD</small>
+        <h2>Shared Building State</h2>
+        <p>Latest cross-node telemetry</p>
+        <strong>Evaluate safety rules</strong>
+      </div>
+
+      <div class="map-connector"><ArrowRight /><ArrowDown /></div>
+
+      <div class="map-column">
+        <p class="map-label">Coordinated responses</p>
+        <article v-for="item in responses" :key="item.label" class="flow-node" :class="`flow-node--${item.tone}`">
+          <span><component :is="item.icon" :size="20" /></span>
+          <div><b>{{ item.node }} · {{ item.label }}</b><small>{{ item.detail }}</small></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="rule-strip">
+      <article v-for="rule in rules" :key="rule.tag" class="raised-card compact-rule">
+        <span>{{ rule.tag }}</span>
+        <div><small>WHEN</small><b>{{ rule.condition }}</b></div>
+        <ArrowRight />
+        <div><small>THEN</small><b>{{ rule.action }}</b></div>
+      </article>
+    </section>
+
+    <p class="safety-latch"><ShieldAlert :size="17" /><b>Safety latch:</b> equipment restoration requires a manual operator reset.</p>
+  </div>
+</template>

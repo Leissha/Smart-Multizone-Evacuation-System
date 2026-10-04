@@ -17,22 +17,39 @@ watchEffect(() => {
 })
 
 const methodLabels: Record<string, string> = {
-  setRelay: 'Relay',
-  setEquipmentAlarm: 'Equipment alarm',
+  setAlarm: 'Local fire alarm',
+  setEquipmentAlarm: 'Equipment isolation',
   setBuzzer: 'Buzzer',
   setEvacuation: 'Evacuation guidance',
   setExitClosed: 'Close exit route',
+  setLockdown: 'Command-centre emergency alert',
 }
 const methodStateKeys: Record<string, string> = {
-  setRelay: 'relay_state',
   setBuzzer: 'buzzer_state',
   setEvacuation: 'evacuation_mode',
   setExitClosed: 'exit_closed',
+}
+const actionLabels: Record<string, [string, string]> = {
+  setAlarm: ['Activate alarm', 'Clear alarm'],
+  setEquipmentAlarm: ['Isolate power', 'Restore power'],
+  setBuzzer: ['Turn buzzer on', 'Turn buzzer off'],
+  setEvacuation: ['Start guidance', 'Stop guidance'],
+  setExitClosed: ['Close route', 'Open route'],
+  setLockdown: ['Start emergency alert', 'Clear emergency alert'],
+}
+
+function visibleMethods(item: { id: string; rpcMethods: string[] }) {
+  return item.rpcMethods.filter((method) => !(item.id === 'node-3-equipment-room' && method === 'setRelay'))
 }
 
 function currentState(method: string) {
   if (method === 'setEquipmentAlarm') {
     return !device.value.telemetry.relay_state ? 'ON' : 'OFF'
+  }
+  if (method === 'setAlarm') return device.value.telemetry.fire_detected ? 'ON' : 'OFF'
+  if (method === 'setLockdown') {
+    const state = String(device.value.telemetry.display_state ?? '').toUpperCase()
+    return state.includes('LOCKDOWN') ? 'ON' : 'OFF'
   }
   const key = methodStateKeys[method]
   if (!key) return '—'
@@ -71,12 +88,12 @@ async function control(method: string, enabled: boolean) {
           <div><p class="eyebrow">{{ device.zone }}</p><h2>{{ device.displayName }}</h2></div>
           <SourceBadge :source="device.source" />
         </div>
-        <div v-if="!device.rpcMethods.length" class="empty-inline">No RPC methods are registered for this node.</div>
-        <div v-for="method in device.rpcMethods" :key="method" class="control-item">
+        <div v-if="!visibleMethods(device).length" class="empty-inline">No RPC methods are registered for this node.</div>
+        <div v-for="method in visibleMethods(device)" :key="method" class="control-item">
           <div><b>{{ methodLabels[method] ?? method }}</b><p>Current state: <strong>{{ currentState(method) }}</strong></p></div>
           <div>
-            <button class="action-button" :disabled="busy !== ''" @click="control(method, true)">Turn ON</button>
-            <button class="soft-button" :disabled="busy !== ''" @click="control(method, false)">Turn OFF</button>
+            <button class="action-button" :disabled="busy !== ''" @click="control(method, true)">{{ actionLabels[method]?.[0] ?? 'Turn ON' }}</button>
+            <button class="soft-button" :disabled="busy !== ''" @click="control(method, false)">{{ actionLabels[method]?.[1] ?? 'Turn OFF' }}</button>
           </div>
         </div>
         <p v-if="message" class="notice">{{ message }}</p>
@@ -85,7 +102,7 @@ async function control(method: string, enabled: boolean) {
         <p class="eyebrow">Contract-driven controls</p>
         <h2>Registered nodes</h2>
         <div class="disabled-control" v-for="item in devices" :key="item.id">
-          <span><b>{{ item.displayName }}</b><small>{{ item.rpcMethods.length ? item.rpcMethods.join(', ') : 'No confirmed RPC contract' }}</small></span>
+          <span><b>{{ item.displayName }}</b><small>{{ visibleMethods(item).length ? visibleMethods(item).join(', ') : 'No confirmed RPC contract' }}</small></span>
           <button disabled>{{ item.source.toUpperCase() }}</button>
         </div>
       </article>

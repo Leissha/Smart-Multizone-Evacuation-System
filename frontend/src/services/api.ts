@@ -1,6 +1,6 @@
 import type {
-  AlarmRecord, DeviceCreatePayload, DeviceProvisionResponse, DeviceStatus,
-  NodeContractSummary, SystemStatus, TelemetryRecord,
+  AlarmRecord, DeviceCreatePayload, DeviceProvisionResponse,
+  NodeContractSummary, TelemetryRecord,
 } from '../types/device'
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
@@ -17,12 +17,10 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 }
 
 export const api = {
-  systemStatus: () => request<SystemStatus>('/api/system/status'),
   nodes: () => request<NodeContractSummary[]>('/api/nodes'),
+  nodesLatest: () => request<Record<string, TelemetryRecord>>('/api/nodes/telemetry/latest'),
   createDevice: (payload: DeviceCreatePayload) => request<DeviceProvisionResponse>('/api/nodes', { method: 'POST', body: JSON.stringify(payload) }),
   devices: () => request<NodeContractSummary[]>('/api/nodes'),
-  nodeStatus: (nodeId: string) => request<DeviceStatus>(`/api/nodes/${encodeURIComponent(nodeId)}/status`),
-  nodeLatest: (nodeId: string) => request<TelemetryRecord>(`/api/nodes/${encodeURIComponent(nodeId)}/telemetry/latest`),
   nodeHistory: (nodeId: string, startTs: number, endTs: number) => request<Record<string, Array<{ ts: number; value: string | number | boolean }>>>(`/api/nodes/${encodeURIComponent(nodeId)}/telemetry/history?start_ts=${startTs}&end_ts=${endTs}`),
   nodeRpc: (nodeId: string, method: string, params: boolean) => request(`/api/nodes/${encodeURIComponent(nodeId)}/rpc`, { method: 'POST', body: JSON.stringify({ method, params }) }),
   alarms: (nodeId?: string) => request<{ data?: AlarmRecord[] }>(`/api/monitor/alarms${nodeId ? `?node_id=${encodeURIComponent(nodeId)}` : ''}`),

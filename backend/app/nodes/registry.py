@@ -14,6 +14,7 @@ NODE_CONTRACTS: tuple[NodeContract, ...] = (
             TelemetryField("smoke_level", "string"),
             TelemetryField("fire_detected", "boolean"),
         ),
+        rpc_methods=("setAlarm",),
         accent="coral",
     ),
     NodeContract(
@@ -42,7 +43,6 @@ NODE_CONTRACTS: tuple[NodeContract, ...] = (
             TelemetryField("sound_level", "number", "ADC"),
             TelemetryField("vibration_detected", "boolean"),
             TelemetryField("relay_state", "boolean"),
-            TelemetryField("equipment_fault", "boolean"),
         ),
         rpc_methods=("setRelay", "setEquipmentAlarm"),
         accent="gold",
