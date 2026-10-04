@@ -3,7 +3,8 @@ const int VIBRATION_PIN = 2;
 const int BUZZER_PIN = 3;
 const int RELAY_PIN = 4;
 
-bool relayState = false;
+// Normal state: the relay powers the demonstration equipment load.
+bool relayState = true;
 bool buzzerState = false;
 
 unsigned long lastSampleTime = 0;
@@ -22,10 +23,10 @@ void setup() {
   pinMode(RELAY_PIN, OUTPUT);
 
   digitalWrite(BUZZER_PIN, LOW);
-  digitalWrite(RELAY_PIN, LOW);
+  digitalWrite(RELAY_PIN, HIGH);
 
   Serial.println("Node 3 hardware test started");
-  Serial.println("Commands: RELAY_ON, RELAY_OFF, BUZZER_ON, BUZZER_OFF, ALL_ON, ALL_OFF");
+  Serial.println("Commands: RELAY_ON, RELAY_OFF, BUZZER_ON, BUZZER_OFF, ALL_ON, ALL_OFF, EQUIPMENT_ALARM_ON, EQUIPMENT_ALARM_OFF");
 }
 
 void loop() {
@@ -96,6 +97,18 @@ void processSerialCommands() {
     setRelay(false);
     setBuzzer(false);
     Serial.println("ACK=ALL_OFF");
+  }
+  else if (command == "EQUIPMENT_ALARM_ON") {
+    // Emergency state: isolate equipment power and sound the warning buzzer.
+    setRelay(false);
+    setBuzzer(true);
+    Serial.println("ACK=EQUIPMENT_ALARM_ON");
+  }
+  else if (command == "EQUIPMENT_ALARM_OFF") {
+    // Normal state: silence the warning and restore equipment power.
+    setBuzzer(false);
+    setRelay(true);
+    Serial.println("ACK=EQUIPMENT_ALARM_OFF");
   }
   else if (command.length() > 0) {
     Serial.print("ERROR=UNKNOWN_COMMAND:");

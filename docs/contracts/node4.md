@@ -1,4 +1,4 @@
-# Node 4 — Command Centre
+# Node 4 — Command Center
 
 Device name: `node-4-command-center`
 
@@ -39,7 +39,7 @@ ThingsBoard sends RPC commands to the edge. The edge converts them to Arduino se
 | `setLockdown` | `LOCKDOWN_ON` | `LOCKDOWN_OFF` |
 | `setBuzzer` | `BUZZER_ON` | `BUZZER_OFF` |
 
-`setLockdown` is the primary command-centre action: it sets `display_state` and `master_buzzer` together. `setBuzzer` controls the buzzer independently, for testing or a buzzer-only alert.
+`setLockdown` is the primary command-center action: it sets `display_state` and `master_buzzer` together. `setBuzzer` controls the buzzer independently, for testing or a buzzer-only alert.
 
 Example response:
 

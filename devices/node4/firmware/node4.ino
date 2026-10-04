@@ -1,5 +1,5 @@
 /*
-  Node 4 - Command Centre
+  Node 4 - Command Center
   SWE30011 Assignment 4 - Rajneesh Sharma
 
   Hardware:

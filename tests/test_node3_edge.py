@@ -132,14 +132,21 @@ def test_rpc_waits_for_ack_and_returns_state():
     assert responses == [("7", {"success": True, "method": "setBuzzer", "buzzer_state": True})]
 
 
-def test_equipment_alarm_rpc_maps_to_existing_all_commands_and_acks():
+def test_equipment_alarm_rpc_isolates_equipment_and_uses_matching_acks():
     assert RPC_COMMANDS == {
         "setRelay": ("RELAY_ON", "RELAY_OFF", "relay_state"),
         "setBuzzer": ("BUZZER_ON", "BUZZER_OFF", "buzzer_state"),
-        "setEquipmentAlarm": ("ALL_ON", "ALL_OFF", "equipment_alarm"),
+        "setEquipmentAlarm": (
+            "EQUIPMENT_ALARM_ON",
+            "EQUIPMENT_ALARM_OFF",
+            "equipment_alarm",
+        ),
     }
 
-    for request_id, enabled, command in (("8", True, "ALL_ON"), ("9", False, "ALL_OFF")):
+    for request_id, enabled, command in (
+        ("8", True, "EQUIPMENT_ALARM_ON"),
+        ("9", False, "EQUIPMENT_ALARM_OFF"),
+    ):
         responses = []
         actuators = ActuatorService()
         client = ThingsBoardClient(Config(), actuators)
