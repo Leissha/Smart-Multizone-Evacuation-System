@@ -2,7 +2,7 @@
 
 Device name: `node-3-equipment-room`
 
-Node 3 monitors sound and movement in the equipment room and controls a buzzer and low-voltage relay load.
+Node 3 monitors sound and movement in the equipment room and controls a low-voltage relay load.
 
 ## Hardware
 
@@ -12,7 +12,6 @@ Node 3 monitors sound and movement in the equipment room and controls a buzzer a
 | --- | --- | --- |
 | Sound sensor | `A -> A0`, `5V -> 5V`, `GND -> GND` | Sound level |
 | Ball switch | `D2 -> switch -> GND`, using `INPUT_PULLUP` | Movement / vibration indication |
-| Passive buzzer | `+ -> D3`, `- -> GND` | Audible alarm |
 | 5V relay | `SIG -> D4`, `5V -> 5V`, `GND -> GND` | Low-voltage equipment control |
 | LED/load | Connected through relay screw terminals | Relay-controlled load indicator |
 
@@ -25,7 +24,6 @@ The Arduino sends one telemetry frame approximately once per second.
 | `sound_level` | Integer `0–1023` | Maximum ADC reading from the sound sampling window |
 | `vibration_detected` | Boolean | Ball switch state |
 | `relay_state` | Boolean | Equipment power relay; `true` means the demonstration load is powered |
-| `buzzer_state` | Boolean | Current buzzer state |
 
 Example:
 
@@ -33,8 +31,7 @@ Example:
 {
   "sound_level": 412,
   "vibration_detected": true,
-  "relay_state": true,
-  "buzzer_state": false
+  "relay_state": true
 }
 ```
 
@@ -47,10 +44,9 @@ ThingsBoard sends RPC commands to the edge. The edge converts them to Arduino se
 | RPC | `true` | `false` |
 | --- | --- | --- |
 | `setRelay` | `RELAY_ON` | `RELAY_OFF` |
-| `setBuzzer` | `BUZZER_ON` | `BUZZER_OFF` |
 | `setEquipmentAlarm` | `EQUIPMENT_ALARM_ON` | `EQUIPMENT_ALARM_OFF` |
 
-`setEquipmentAlarm(true)` isolates the equipment by switching the relay off and activates the buzzer. `setEquipmentAlarm(false)` silences the buzzer and restores the relay-powered load. The edge reports success only after the matching Arduino ACK.
+`setEquipmentAlarm(true)` isolates the equipment by switching the relay off. `setEquipmentAlarm(false)` restores the relay-powered load. The edge reports success only after the matching Arduino ACK.
 
 Example response:
 
@@ -124,7 +120,7 @@ THINGSBOARD_TLS
 3. Start the Node 3 edge service.
 4. Confirm telemetry updates in ThingsBoard.
 5. Trigger the sound sensor and ball switch.
-6. Test `setRelay`, `setBuzzer`, and `setEquipmentAlarm`.
+6. Test `setRelay` and `setEquipmentAlarm`.
 7. Confirm the physical output and matching ACK.
 8. Verify the updated state is returned to ThingsBoard.
 

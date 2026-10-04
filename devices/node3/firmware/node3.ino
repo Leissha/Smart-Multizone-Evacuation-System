@@ -1,11 +1,9 @@
 const int SOUND_PIN = A0;
 const int VIBRATION_PIN = 2;
-const int BUZZER_PIN = 3;
 const int RELAY_PIN = 4;
 
 // Normal state: the relay powers the demonstration equipment load.
 bool relayState = true;
-bool buzzerState = false;
 
 unsigned long lastSampleTime = 0;
 const unsigned long SAMPLE_INTERVAL = 1000;
@@ -19,14 +17,12 @@ void setup() {
   // L1  -> GND
   pinMode(VIBRATION_PIN, INPUT_PULLUP);
 
-  pinMode(BUZZER_PIN, OUTPUT);
   pinMode(RELAY_PIN, OUTPUT);
 
-  digitalWrite(BUZZER_PIN, LOW);
   digitalWrite(RELAY_PIN, HIGH);
 
   Serial.println("Node 3 hardware test started");
-  Serial.println("Commands: RELAY_ON, RELAY_OFF, BUZZER_ON, BUZZER_OFF, ALL_ON, ALL_OFF, EQUIPMENT_ALARM_ON, EQUIPMENT_ALARM_OFF");
+  Serial.println("Commands: RELAY_ON, RELAY_OFF, EQUIPMENT_ALARM_ON, EQUIPMENT_ALARM_OFF");
 }
 
 void loop() {
@@ -58,10 +54,7 @@ void printSensorData() {
   Serial.print(vibrationDetected ? "true" : "false");
 
   Serial.print(", relay_state=");
-  Serial.print(relayState ? "true" : "false");
-
-  Serial.print(", buzzer_state=");
-  Serial.println(buzzerState ? "true" : "false");
+  Serial.println(relayState ? "true" : "false");
 }
 
 void processSerialCommands() {
@@ -80,33 +73,13 @@ void processSerialCommands() {
     setRelay(false);
     Serial.println("ACK=RELAY_OFF");
   }
-  else if (command == "BUZZER_ON") {
-    setBuzzer(true);
-    Serial.println("ACK=BUZZER_ON");
-  }
-  else if (command == "BUZZER_OFF") {
-    setBuzzer(false);
-    Serial.println("ACK=BUZZER_OFF");
-  }
-  else if (command == "ALL_ON") {
-    setRelay(true);
-    setBuzzer(true);
-    Serial.println("ACK=ALL_ON");
-  }
-  else if (command == "ALL_OFF") {
-    setRelay(false);
-    setBuzzer(false);
-    Serial.println("ACK=ALL_OFF");
-  }
   else if (command == "EQUIPMENT_ALARM_ON") {
-    // Emergency state: isolate equipment power and sound the warning buzzer.
+    // Emergency state: isolate the demonstration equipment power.
     setRelay(false);
-    setBuzzer(true);
     Serial.println("ACK=EQUIPMENT_ALARM_ON");
   }
   else if (command == "EQUIPMENT_ALARM_OFF") {
-    // Normal state: silence the warning and restore equipment power.
-    setBuzzer(false);
+    // Normal state: restore the demonstration equipment power.
     setRelay(true);
     Serial.println("ACK=EQUIPMENT_ALARM_OFF");
   }
@@ -123,14 +96,4 @@ void setRelay(bool enabled) {
   // HIGH = relay closed
   // LOW  = relay open
   digitalWrite(RELAY_PIN, enabled ? HIGH : LOW);
-}
-
-void setBuzzer(bool enabled) {
-  buzzerState = enabled;
-
-  if (enabled) {
-    tone(BUZZER_PIN, 532);
-  } else {
-    noTone(BUZZER_PIN);
-  }
 }

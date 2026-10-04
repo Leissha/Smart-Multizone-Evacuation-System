@@ -7,7 +7,6 @@ REQUIRED_FIELDS = {
     "sound_level",
     "vibration_detected",
     "relay_state",
-    "buzzer_state",
 }
 
 
@@ -44,7 +43,6 @@ def parse_telemetry_line(line: str) -> dict[str, Any] | None:
             "sound_level": sound_level,
             "vibration_detected": parse_bool(values["vibration_detected"]),
             "relay_state": parse_bool(values["relay_state"]),
-            "buzzer_state": parse_bool(values["buzzer_state"]),
         }
     except (TypeError, ValueError):
         return None
