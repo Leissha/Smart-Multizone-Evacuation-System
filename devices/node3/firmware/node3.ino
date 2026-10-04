@@ -7,7 +7,8 @@ bool relayState = true;
 
 unsigned long lastSampleTime = 0;
 const unsigned long SAMPLE_INTERVAL = 1000;
-const unsigned long SOUND_WINDOW_MS = 75;
+int soundPeak = 0;
+bool vibrationSeen = false;
 
 void setup() {
   Serial.begin(9600);
@@ -28,25 +29,21 @@ void setup() {
 void loop() {
   processSerialCommands();
 
+  // Sample continuously so short sound and vibration events are not missed.
+  soundPeak = max(soundPeak, analogRead(SOUND_PIN));
+  if (digitalRead(VIBRATION_PIN) == LOW) {
+    vibrationSeen = true;
+  }
+
   if (millis() - lastSampleTime >= SAMPLE_INTERVAL) {
     lastSampleTime = millis();
-    printSensorData();
+    printSensorData(soundPeak, vibrationSeen);
+    soundPeak = 0;
+    vibrationSeen = false;
   }
 }
 
-void printSensorData() {
-  // Capture the loudest sample in a short window instead of relying on one
-  // instantaneous ADC reading each second.
-  int soundLevel = 0;
-  unsigned long windowStart = millis();
-  while (millis() - windowStart < SOUND_WINDOW_MS) {
-    soundLevel = max(soundLevel, analogRead(SOUND_PIN));
-  }
-
-  // INPUT_PULLUP:
-  // switch connected to GND => LOW
-  bool vibrationDetected = digitalRead(VIBRATION_PIN) == LOW;
-
+void printSensorData(int soundLevel, bool vibrationDetected) {
   Serial.print("sound_level=");
   Serial.print(soundLevel);
 
