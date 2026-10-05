@@ -7,11 +7,11 @@
     "debugMode": false,
     "configuration": null,
     "additionalInfo": {
-      "description": "Integration rule chain for all active script filter/switch/transform nodes."
+      "description": "Final integration rule chain for all four project nodes, including manual emergency input."
     }
   },
   "metadata": {
-    "version": 4,
+    "version": 12,
     "firstNodeIndex": 1,
     "nodes": [
       {
@@ -83,7 +83,7 @@
         "configuration": {
           "scriptLang": "TBEL",
           "jsScript": "function nextRelation(metadata, msg) {\n    return ['one','nine'];\n}\nif(msgType === 'POST_TELEMETRY_REQUEST') {\n    return ['two'];\n}\nreturn nextRelation(metadata, msg);",
-          "tbelScript": "var name = metadata.get(\"deviceName\");\r\n\r\nif (name == \"node-1-fire-detection\") {\r\n    return \"Node 1\";\r\n}\r\n\r\nif (name == \"node-2-exit-monitoring\") {\r\n    return \"Node 2\";\r\n}\r\n\r\nif (name == \"node-3-equipment-room\") {\r\n    return \"Node 3\";\r\n}\r\n\r\nreturn \"Other\";"
+          "tbelScript": "var name = metadata.get(\"deviceName\");\r\n\r\nif (name == \"node-1-fire-detection\") {\r\n    return \"Node 1\";\r\n}\r\n\r\nif (name == \"node-2-exit-monitoring\") {\r\n    return \"Node 2\";\r\n}\r\n\r\nif (name == \"node-3-equipment-room\") {\r\n    return \"Node 3\";\r\n}\r\n\r\nif (name == \"node-4-command-center\") {\r\n    return \"Node 4\";\r\n}\r\n\r\nreturn \"Other\";"
         },
         "additionalInfo": {
           "description": "",
@@ -177,8 +177,8 @@
         "configurationVersion": 0,
         "configuration": {
           "scriptLang": "TBEL",
-          "jsScript": "return msg.fire_detected === true || (msg.temperature > 30 && msg.smoke_level === \"HIGH\");",
-          "tbelScript": "return msg.fire_detected == true || (msg.temperature > 30 && msg.smoke_level == \"HIGH\");"
+          "jsScript": "return msg.fire_detected === true || msg.temperature > 50 || msg.smoke_level === \"HIGH\";",
+          "tbelScript": "return msg.fire_detected == true || msg.temperature > 50 || msg.smoke_level == \"HIGH\";"
         },
         "additionalInfo": {
           "description": "",
@@ -344,7 +344,8 @@
             "fire_active",
             "exit_blocked",
             "node3_sound_level",
-            "node3_vibration"
+            "node3_vibration",
+            "manual_emergency"
           ],
           "serverAttributeNames": [],
           "sharedAttributeNames": [],
@@ -467,7 +468,7 @@
         "configuration": {
           "scriptLang": "TBEL",
           "jsScript": "return ['DEFAULT'];",
-          "tbelScript": "var fire = metadata.get(\"fire_active\");\nvar blocked = metadata.get(\"exit_blocked\");\n\nvar fireOn = fire == true || fire == \"true\";\nvar exitBlocked = blocked == true || blocked == \"true\";\n\nif (fireOn && exitBlocked) {\n    return \"FIRE_EXIT_BLOCKED\";\n}\nif (fireOn) {\n    return \"EVACUATE\";\n}\nreturn \"NO_ACTION\";"
+          "tbelScript": "var fire = metadata.get(\"fire_active\");\nvar blocked = metadata.get(\"exit_blocked\");\nvar manual = metadata.get(\"manual_emergency\");\n\nvar fireOn = fire == true || fire == \"true\";\nvar exitBlocked = blocked == true || blocked == \"true\";\nvar manualOn = manual == true || manual == \"true\";\nvar emergencyOn = fireOn || manualOn;\n\nif (emergencyOn && exitBlocked) {\n    return \"FIRE_EXIT_BLOCKED\";\n}\nif (emergencyOn) {\n    return \"EVACUATE\";\n}\nreturn \"NO_ACTION\";"
         },
         "additionalInfo": {
           "description": "",
@@ -489,8 +490,8 @@
         },
         "additionalInfo": {
           "description": "",
-          "layoutX": 1030,
-          "layoutY": 580
+          "layoutX": 1037,
+          "layoutY": 571
         }
       },
       {
@@ -538,8 +539,8 @@
         },
         "additionalInfo": {
           "description": "",
-          "layoutX": 1029,
-          "layoutY": 632
+          "layoutX": 1037,
+          "layoutY": 631
         }
       },
       {
@@ -636,8 +637,8 @@
         },
         "additionalInfo": {
           "description": "",
-          "layoutX": 1032,
-          "layoutY": 744
+          "layoutX": 1031,
+          "layoutY": 756
         }
       },
       {
@@ -667,8 +668,46 @@
         },
         "additionalInfo": {
           "description": "",
-          "layoutX": 1326,
-          "layoutY": 742
+          "layoutX": 1329,
+          "layoutY": 756
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.filter.TbCheckMessageNode",
+        "name": "Check Node 4 telemetry fields exist",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "messageNames": [
+            "manual_emergency"
+          ],
+          "metadataNames": [],
+          "checkAllKeys": true
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 322,
+          "layoutY": 515
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "System state: Manual Emergency",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "TBEL",
+          "jsScript": "return {\n    msg: { manual_emergency: msg.manual_emergency === true },\n    metadata: metadata,\n    msgType: \"POST_TELEMETRY_REQUEST\"\n};",
+          "tbelScript": "return {\n    msg: { manual_emergency: msg.manual_emergency == true },\n    metadata: metadata,\n    msgType: \"POST_TELEMETRY_REQUEST\"\n};"
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 700,
+          "layoutY": 515
         }
       }
     ],
@@ -800,6 +839,11 @@
       },
       {
         "fromIndex": 20,
+        "toIndex": 21,
+        "type": "FIRE_EXIT_BLOCKED"
+      },
+      {
+        "fromIndex": 20,
         "toIndex": 23,
         "type": "EVACUATE"
       },
@@ -851,6 +895,21 @@
       {
         "fromIndex": 28,
         "toIndex": 19,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 3,
+        "toIndex": 29,
+        "type": "Node 4"
+      },
+      {
+        "fromIndex": 29,
+        "toIndex": 30,
+        "type": "True"
+      },
+      {
+        "fromIndex": 30,
+        "toIndex": 12,
         "type": "Success"
       }
     ],

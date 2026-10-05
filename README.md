@@ -4,6 +4,10 @@ SWE30011 IoT project for monitoring and controlling four building safety zones.
 
 Each physical node runs its own edge service. ThingsBoard handles MQTT telemetry, alarms and RPC, while FastAPI and Vue provide the shared web interface.
 
+## System overview
+
+![Smart multi-zone building overview showing the four connected safety zones](docs/image.png)
+
 ## Architecture
 
 ![System architecture](docs/architecture-design.png)
