@@ -1,0 +1,859 @@
+{
+  "ruleChain": {
+    "name": "Evacuation System Rules - Integration",
+    "type": "CORE",
+    "firstRuleNodeId": null,
+    "root": false,
+    "debugMode": false,
+    "configuration": null,
+    "additionalInfo": {
+      "description": "Integration rule chain for all active script filter/switch/transform nodes."
+    }
+  },
+  "metadata": {
+    "version": 4,
+    "firstNodeIndex": 1,
+    "nodes": [
+      {
+        "type": "org.thingsboard.rule.engine.filter.TbCheckMessageNode",
+        "name": "Check Node 3 telemetry fields exist",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "messageNames": [
+            "sound_level",
+            "vibration_detected"
+          ],
+          "metadataNames": [],
+          "checkAllKeys": true
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 322,
+          "layoutY": 452
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.telemetry.TbMsgTimeseriesNode",
+        "name": "Save telemetry data",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 1,
+        "configuration": {
+          "defaultTTL": 0,
+          "useServerTs": false,
+          "processingSettings": {
+            "type": "ON_EVERY_MESSAGE"
+          }
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 45,
+          "layoutY": 226
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.filter.TbMsgTypeFilterNode",
+        "name": "Classify devices",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "messageTypes": [
+            "POST_TELEMETRY_REQUEST"
+          ]
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 45,
+          "layoutY": 323
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.filter.TbJsSwitchNode",
+        "name": "Devices Switch",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "TBEL",
+          "jsScript": "function nextRelation(metadata, msg) {\n    return ['one','nine'];\n}\nif(msgType === 'POST_TELEMETRY_REQUEST') {\n    return ['two'];\n}\nreturn nextRelation(metadata, msg);",
+          "tbelScript": "var name = metadata.get(\"deviceName\");\r\n\r\nif (name == \"node-1-fire-detection\") {\r\n    return \"Node 1\";\r\n}\r\n\r\nif (name == \"node-2-exit-monitoring\") {\r\n    return \"Node 2\";\r\n}\r\n\r\nif (name == \"node-3-equipment-room\") {\r\n    return \"Node 3\";\r\n}\r\n\r\nreturn \"Other\";"
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 33,
+          "layoutY": 412
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.filter.TbCheckMessageNode",
+        "name": "Check Node 2 telemetry fields exist",
+        "debugSettings": {
+          "failuresEnabled": false,
+          "allEnabled": false,
+          "allEnabledUntil": 0
+        },
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "messageNames": [
+            "exit_blocked",
+            "distance_cm"
+          ],
+          "metadataNames": [],
+          "checkAllKeys": true
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 322,
+          "layoutY": 390
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.filter.TbJsFilterNode",
+        "name": "Exit Blocked?",
+        "debugSettings": {
+          "failuresEnabled": false,
+          "allEnabled": false,
+          "allEnabledUntil": 0
+        },
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "TBEL",
+          "jsScript": "return msg.exit_blocked == true;",
+          "tbelScript": "return msg.exit_blocked == true;"
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 583,
+          "layoutY": 385
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.filter.TbCheckMessageNode",
+        "name": "Check Node 1 telemetry fields exist",
+        "debugSettings": {
+          "failuresEnabled": false,
+          "allEnabled": false,
+          "allEnabledUntil": 0
+        },
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "messageNames": [
+            "fire_detected",
+            "smoke_level",
+            "temperature"
+          ],
+          "metadataNames": [],
+          "checkAllKeys": true
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 320,
+          "layoutY": 266
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.filter.TbJsFilterNode",
+        "name": "Fire Detected?",
+        "debugSettings": {
+          "failuresEnabled": false,
+          "allEnabled": false,
+          "allEnabledUntil": 0
+        },
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "TBEL",
+          "jsScript": "return msg.fire_detected === true || (msg.temperature > 30 && msg.smoke_level === \"HIGH\");",
+          "tbelScript": "return msg.fire_detected == true || (msg.temperature > 30 && msg.smoke_level == \"HIGH\");"
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 587,
+          "layoutY": 263
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "System state: Fire ON",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "TBEL",
+          "jsScript": "return {\r\n    msg: {\r\n        fire_active: true\r\n    },\r\n    metadata: metadata,\r\n    msgType: \"POST_TELEMETRY_REQUEST\"\r\n};",
+          "tbelScript": "return {\n    msg: {\n        fire_active: true\n    },\n    metadata: metadata,\n    msgType: \"POST_TELEMETRY_REQUEST\"\n};"
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 831,
+          "layoutY": 203
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "System state: Fire OFF",
+        "debugSettings": {
+          "failuresEnabled": false,
+          "allEnabled": false,
+          "allEnabledUntil": 0
+        },
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "TBEL",
+          "jsScript": "return {\r\n    msg: {\r\n        fire_active: false\r\n    },\r\n    metadata: metadata,\r\n    msgType: \"POST_TELEMETRY_REQUEST\"\r\n};",
+          "tbelScript": "return {\n    msg: {\n        fire_active: false\n    },\n    metadata: metadata,\n    msgType: \"POST_TELEMETRY_REQUEST\"\n};"
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 833,
+          "layoutY": 257
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "System state: Exit BLOCKED",
+        "debugSettings": {
+          "failuresEnabled": false,
+          "allEnabled": false,
+          "allEnabledUntil": 0
+        },
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "TBEL",
+          "jsScript": "return {\r\n    msg: {\r\n        exit_blocked: true\r\n    },\r\n    metadata: metadata,\r\n    msgType: \"POST_TELEMETRY_REQUEST\"\r\n};",
+          "tbelScript": "return {\n    msg: {\n        exit_blocked: true\n    },\n    metadata: metadata,\n    msgType: \"POST_TELEMETRY_REQUEST\"\n};"
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 828,
+          "layoutY": 322
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "System state: Exit CLEAR",
+        "debugSettings": {
+          "failuresEnabled": false,
+          "allEnabled": false,
+          "allEnabledUntil": 0
+        },
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "TBEL",
+          "jsScript": "return {\r\n    msg: {\r\n        exit_blocked: false\r\n    },\r\n    metadata: metadata,\r\n    msgType: \"POST_TELEMETRY_REQUEST\"\r\n};",
+          "tbelScript": "return {\n    msg: {\n        exit_blocked: false\n    },\n    metadata: metadata,\n    msgType: \"POST_TELEMETRY_REQUEST\"\n};"
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 831,
+          "layoutY": 377
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.transform.TbChangeOriginatorNode",
+        "name": "Target Shared Building State",
+        "debugSettings": {
+          "failuresEnabled": false,
+          "allEnabled": false,
+          "allEnabledUntil": 0
+        },
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 1,
+        "configuration": {
+          "originatorSource": "ENTITY",
+          "preserveOriginatorIfCustomer": false,
+          "entityType": "ASSET",
+          "entityNamePattern": "Smart Evacuation Building",
+          "relationsQuery": {
+            "direction": "FROM",
+            "maxLevel": 1,
+            "filters": [
+              {
+                "relationType": "Contains",
+                "entityTypes": [],
+                "negate": false
+              }
+            ],
+            "fetchLastLevelOnly": false
+          }
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 1143,
+          "layoutY": 377
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.telemetry.TbMsgTimeseriesNode",
+        "name": "Save Timeseries",
+        "debugSettings": {
+          "failuresEnabled": false,
+          "allEnabled": false,
+          "allEnabledUntil": 0
+        },
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 1,
+        "configuration": {
+          "defaultTTL": 0,
+          "useServerTs": false,
+          "processingSettings": {
+            "type": "ON_EVERY_MESSAGE"
+          }
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 1429,
+          "layoutY": 372
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.metadata.TbGetAttributesNode",
+        "name": "Load Cross-node State",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 1,
+        "configuration": {
+          "tellFailureIfAbsent": false,
+          "fetchTo": "METADATA",
+          "clientAttributeNames": [],
+          "latestTsKeyNames": [
+            "fire_active",
+            "exit_blocked",
+            "node3_sound_level",
+            "node3_vibration"
+          ],
+          "serverAttributeNames": [],
+          "sharedAttributeNames": [],
+          "getLatestValueWithTs": false
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 337,
+          "layoutY": 567
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "System state: Node 3 Sensors",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "TBEL",
+          "jsScript": "return {\n    msg: {\n        node3_sound_level: Number(msg.sound_level),\n        node3_vibration: msg.vibration_detected === true\n    },\n    metadata: metadata,\n    msgType: \"POST_TELEMETRY_REQUEST\"\n};",
+          "tbelScript": "return {\n    msg: {\n        node3_sound_level: msg.sound_level,\n        node3_vibration: msg.vibration_detected == true\n    },\n    metadata: metadata,\n    msgType: \"POST_TELEMETRY_REQUEST\"\n};"
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 700,
+          "layoutY": 451
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.filter.TbJsSwitchNode",
+        "name": "Cross-node Equipment Safety",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "TBEL",
+          "jsScript": "return ['DEFAULT'];",
+          "tbelScript": "var fire = metadata.get(\"fire_active\");\r\nvar sound = metadata.get(\"node3_sound_level\");\r\nvar vibration = metadata.get(\"node3_vibration\");\r\n\r\nvar fireOn = fire == true || fire == \"true\";\r\nvar vibrationOn = vibration == true || vibration == \"true\";\r\n\r\nvar soundLevel = 0.0;\r\n\r\nif (sound != null) {\r\n    soundLevel = parseDouble(sound);\r\n}\r\n\r\nif (fireOn && soundLevel > 100 && vibrationOn) {\r\n    return \"ISOLATE\";\r\n}\r\n\r\nreturn \"NO_ACTION\";"
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 584,
+          "layoutY": 536
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.transform.TbChangeOriginatorNode",
+        "name": "Target Node 3",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 1,
+        "configuration": {
+          "originatorSource": "ENTITY",
+          "preserveOriginatorIfCustomer": false,
+          "entityType": "DEVICE",
+          "entityNamePattern": "node-3-equipment-room",
+          "relationsQuery": {
+            "direction": "FROM",
+            "maxLevel": 1,
+            "filters": [
+              {
+                "relationType": "Contains",
+                "entityTypes": [],
+                "negate": false
+              }
+            ],
+            "fetchLastLevelOnly": false
+          }
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 1031,
+          "layoutY": 507
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "RPC Node 3: Equipment Isolation",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "TBEL",
+          "jsScript": "return {\n    msg: { method: \"setEquipmentAlarm\", params: true },\n    metadata: metadata,\n    msgType: msgType\n};",
+          "tbelScript": "return {\n    msg: {\n        method: \"setEquipmentAlarm\",\n        params: true\n    },\n    metadata: metadata,\n    msgType: msgType\n};"
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 1330,
+          "layoutY": 510
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.rpc.TbSendRPCRequestNode",
+        "name": "Send Cross-node RPC",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "timeoutInSeconds": 10
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 1620,
+          "layoutY": 583
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.filter.TbJsSwitchNode",
+        "name": "Cross-node Evacuation Safety",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "TBEL",
+          "jsScript": "return ['DEFAULT'];",
+          "tbelScript": "var fire = metadata.get(\"fire_active\");\nvar blocked = metadata.get(\"exit_blocked\");\n\nvar fireOn = fire == true || fire == \"true\";\nvar exitBlocked = blocked == true || blocked == \"true\";\n\nif (fireOn && exitBlocked) {\n    return \"FIRE_EXIT_BLOCKED\";\n}\nif (fireOn) {\n    return \"EVACUATE\";\n}\nreturn \"NO_ACTION\";"
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 580,
+          "layoutY": 610
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "RPC Node 2: Evacuation ON",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "TBEL",
+          "jsScript": "return {\n    msg: { method: \"setEvacuation\", params: true },\n    metadata: metadata,\n    msgType: msgType\n};",
+          "tbelScript": "return {\n    msg: {\n        method: \"setEvacuation\",\n        params: true\n    },\n    metadata: metadata,\n    msgType: msgType\n};"
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 1030,
+          "layoutY": 580
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.transform.TbChangeOriginatorNode",
+        "name": "Target Node 2 Evacuation",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 1,
+        "configuration": {
+          "originatorSource": "ENTITY",
+          "preserveOriginatorIfCustomer": false,
+          "entityType": "DEVICE",
+          "entityNamePattern": "node-2-exit-monitoring",
+          "relationsQuery": {
+            "direction": "FROM",
+            "maxLevel": 1,
+            "filters": [
+              {
+                "relationType": "Contains",
+                "entityTypes": [],
+                "negate": false
+              }
+            ],
+            "fetchLastLevelOnly": false
+          }
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 1328,
+          "layoutY": 570
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "RPC Node 4: Lockdown ON",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "TBEL",
+          "jsScript": "return {\n    msg: { method: \"setLockdown\", params: true },\n    metadata: metadata,\n    msgType: msgType\n};",
+          "tbelScript": "return {\n    msg: {\n        method: \"setLockdown\",\n        params: true\n    },\n    metadata: metadata,\n    msgType: msgType\n};"
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 1029,
+          "layoutY": 632
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.transform.TbChangeOriginatorNode",
+        "name": "Target Node 4 Evacuation",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 1,
+        "configuration": {
+          "originatorSource": "ENTITY",
+          "preserveOriginatorIfCustomer": false,
+          "entityType": "DEVICE",
+          "entityNamePattern": "node-4-command-center",
+          "relationsQuery": {
+            "direction": "FROM",
+            "maxLevel": 1,
+            "filters": [
+              {
+                "relationType": "Contains",
+                "entityTypes": [],
+                "negate": false
+              }
+            ],
+            "fetchLastLevelOnly": false
+          }
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 1330,
+          "layoutY": 625
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "RPC Node 2: Route Closed",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "TBEL",
+          "jsScript": "return {\n    msg: { method: \"setExitClosed\", params: true },\n    metadata: metadata,\n    msgType: msgType\n};",
+          "tbelScript": "return {\n    msg: {\n        method: \"setExitClosed\",\n        params: true\n    },\n    metadata: metadata,\n    msgType: msgType\n};"
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 1033,
+          "layoutY": 694
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.transform.TbChangeOriginatorNode",
+        "name": "Target Node 2 Route Closed",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 1,
+        "configuration": {
+          "originatorSource": "ENTITY",
+          "preserveOriginatorIfCustomer": false,
+          "entityType": "DEVICE",
+          "entityNamePattern": "node-2-exit-monitoring",
+          "relationsQuery": {
+            "direction": "FROM",
+            "maxLevel": 1,
+            "filters": [
+              {
+                "relationType": "Contains",
+                "entityTypes": [],
+                "negate": false
+              }
+            ],
+            "fetchLastLevelOnly": false
+          }
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 1326,
+          "layoutY": 688
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "RPC Node 4: Critical Lockdown",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "TBEL",
+          "jsScript": "return {\n    msg: { method: \"setLockdown\", params: true },\n    metadata: metadata,\n    msgType: msgType\n};",
+          "tbelScript": "return {\n    msg: {\n        method: \"setLockdown\",\n        params: true\n    },\n    metadata: metadata,\n    msgType: msgType\n};"
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 1032,
+          "layoutY": 744
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.transform.TbChangeOriginatorNode",
+        "name": "Target Node 4 Critical",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 1,
+        "configuration": {
+          "originatorSource": "ENTITY",
+          "preserveOriginatorIfCustomer": false,
+          "entityType": "DEVICE",
+          "entityNamePattern": "node-4-command-center",
+          "relationsQuery": {
+            "direction": "FROM",
+            "maxLevel": 1,
+            "filters": [
+              {
+                "relationType": "Contains",
+                "entityTypes": [],
+                "negate": false
+              }
+            ],
+            "fetchLastLevelOnly": false
+          }
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 1326,
+          "layoutY": 742
+        }
+      }
+    ],
+    "connections": [
+      {
+        "fromIndex": 0,
+        "toIndex": 15,
+        "type": "True"
+      },
+      {
+        "fromIndex": 1,
+        "toIndex": 2,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 2,
+        "toIndex": 3,
+        "type": "True"
+      },
+      {
+        "fromIndex": 3,
+        "toIndex": 0,
+        "type": "Node 3"
+      },
+      {
+        "fromIndex": 3,
+        "toIndex": 4,
+        "type": "Node 2"
+      },
+      {
+        "fromIndex": 3,
+        "toIndex": 6,
+        "type": "Node 1"
+      },
+      {
+        "fromIndex": 4,
+        "toIndex": 5,
+        "type": "True"
+      },
+      {
+        "fromIndex": 5,
+        "toIndex": 10,
+        "type": "True"
+      },
+      {
+        "fromIndex": 5,
+        "toIndex": 11,
+        "type": "False"
+      },
+      {
+        "fromIndex": 6,
+        "toIndex": 7,
+        "type": "True"
+      },
+      {
+        "fromIndex": 7,
+        "toIndex": 8,
+        "type": "True"
+      },
+      {
+        "fromIndex": 7,
+        "toIndex": 9,
+        "type": "False"
+      },
+      {
+        "fromIndex": 8,
+        "toIndex": 12,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 9,
+        "toIndex": 12,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 10,
+        "toIndex": 12,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 11,
+        "toIndex": 12,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 12,
+        "toIndex": 13,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 13,
+        "toIndex": 14,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 14,
+        "toIndex": 16,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 14,
+        "toIndex": 20,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 15,
+        "toIndex": 12,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 16,
+        "toIndex": 17,
+        "type": "ISOLATE"
+      },
+      {
+        "fromIndex": 17,
+        "toIndex": 18,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 18,
+        "toIndex": 19,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 20,
+        "toIndex": 21,
+        "type": "EVACUATE"
+      },
+      {
+        "fromIndex": 20,
+        "toIndex": 23,
+        "type": "EVACUATE"
+      },
+      {
+        "fromIndex": 20,
+        "toIndex": 25,
+        "type": "FIRE_EXIT_BLOCKED"
+      },
+      {
+        "fromIndex": 20,
+        "toIndex": 27,
+        "type": "FIRE_EXIT_BLOCKED"
+      },
+      {
+        "fromIndex": 21,
+        "toIndex": 22,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 22,
+        "toIndex": 19,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 23,
+        "toIndex": 24,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 24,
+        "toIndex": 19,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 25,
+        "toIndex": 26,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 26,
+        "toIndex": 19,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 27,
+        "toIndex": 28,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 28,
+        "toIndex": 19,
+        "type": "Success"
+      }
+    ],
+    "ruleChainConnections": null
+  }
+}

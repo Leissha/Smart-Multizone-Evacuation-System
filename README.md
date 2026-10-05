@@ -29,7 +29,9 @@ See the [Node 2 contract](docs/contracts/node2.md) and the [Node 2 setup guide](
 
 ## Node 3
 
-Node 3 is the current physical reference implementation.
+Node 3 monitors equipment-room sound and vibration. When fire is active and Node 3 detects vibration with a sound level above 100 ADC, ThingsBoard sends `setEquipmentAlarm(true)` through the edge service. The Arduino then switches the relay off to isolate the demonstration equipment load.
+
+The equipment remains isolated until an operator checks that the area is safe and manually restores the load with `setRelay(true)`.
 
 See the [Node 3 contract](docs/contracts/node3.md) for hardware, telemetry, RPC and verification details.
 
